@@ -1,10 +1,17 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../../assets/css/login.css";
 import logo from "../../assets/logo.png";
 import fundo from "../../assets/fundo.png";
 
 
 function Login() {
+
+    const navigate = useNavigate();
+
+    function ExecuteLogin() {
+        navigate("/appointments");
+    }
+
     return <div className="row">
         <div className="col-sm-5 d-flex justify-content-center align-items-center text-center">
 
