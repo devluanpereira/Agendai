@@ -1,3 +1,51 @@
 .col-buttons {
     width: 120px;
 }
+
+/* Estilos gerais */
+.mt-page {
+    margin-top: 70px;
+}
+
+/* Responsividade da tabela */
+.table-responsive {
+    overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+    .table thead {
+        display: none; /* Esconde o cabeçalho da tabela em telas pequenas */
+    }
+
+    .table tbody tr {
+        display: block;
+        margin-bottom: 15px;
+    }
+
+    .table tbody tr td {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px;
+        border: none;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .table tbody tr td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    .col-buttons {
+        text-align: center;
+    }
+
+    .form-control {
+        width: 100%;
+    }
+
+    .d-flex {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
