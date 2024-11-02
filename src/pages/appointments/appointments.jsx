@@ -3,6 +3,8 @@ import Navbar from "../../components/navbar/navbar";
 import { Link, useNavigate } from "react-router-dom";
 import Appointment from "../../components/appointments/appointment";
 import { useEffect, useState } from "react";
+import { confirmAlert } from "react-confirm-alert";
+import 'react-confirm-alert/src/react-confirm-alert.css'; 
 import api from "../../constants/api";
 
 function Appointments() {
@@ -19,7 +21,20 @@ function Appointments() {
     }
 
     function ClickDelete(id_appointment) {
-        console.log("Excluir " + id_appointment);
+        confirmAlert({
+            title: "Excluir",
+            message: "Voce tem certeza que deseja excluir este agendamento ?",
+            buttons: [
+                {
+                    label: "Sim",
+                    onClick: () => DeleteAppointments(id_appointment)
+                },
+                {
+                    label: "Não",
+                    onClick: () => {}
+                }
+            ]
+        });
     }
 
     async function LoadDoctors() {
@@ -40,6 +55,28 @@ function Appointments() {
             }
             else
                 alert("Erro ao carregar médicos");
+        }
+    }
+
+
+    async function DeleteAppointments(id) {
+
+        try {
+            const response = await api.delete("/appointments/" + id);
+
+            if (response.data) {
+                LoadAppointments();
+            }
+        } catch (error) {
+            if (error.response?.data.error) {
+                if (error.response.status == 401)
+                    return navigate("/");
+
+                alert(error.response?.data.error);
+
+            }
+            else
+                alert("Erro ao excluir dados");
         }
     }
 

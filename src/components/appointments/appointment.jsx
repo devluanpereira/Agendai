@@ -1,39 +1,57 @@
 
 
 function Appointment(props) {
-
-    //const dt = new Date(props.booking_date);
-
-    const dt = new Date(props.booking_date + "T" + props.booking_hour);
-    const dataformatada = dt.toLocaleString("pt-BR", {
+    // Concatena a data e hora para criar o objeto Date
+    const dt = new Date(`${props.booking_date}T${props.booking_hour}`);
+    
+    // Formatação da data e hora com `-` e `h` no padrão brasileiro
+    const dataFormatada = dt.toLocaleDateString("pt-BR", {
         day: "2-digit",
         month: "2-digit",
-        year: "numeric",
+        year: "numeric"
+    });
+
+    const horaFormatada = dt.toLocaleTimeString("pt-BR", {
         hour: "2-digit",
         minute: "2-digit"
-    })
+    });
 
-    console.log(dataformatada)
+    const dataHoraFormatada = `${dataFormatada} - ${horaFormatada}h`;
 
-    return <tr>
-        <td>{props.user}</td>
-        <td>{props.doctor}</td>
-        <td>{props.service}</td>
-        <td>{dataformatada}</td>
-        <td>{new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(props.price)}</td>
-        <td className="text-end">
-            <div className="d-inline me-2">
-                <button onClick={() => props.clickEdit(props.id_appointment)}
-                    className="btn btn-sm btn-primary">
+    // Formatação do preço para BRL
+    const precoFormatado = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    }).format(props.price);
+
+    return (
+        <tr>
+            <td>{props.user}</td>
+            <td>{props.doctor}</td>
+            <td>{props.service}</td>
+            <td>{dataHoraFormatada}</td>
+            <td>{precoFormatado}</td>
+            <td className="text-end">
+                {/* Botão de edição */}
+                <button
+                    onClick={() => props.clickEdit(props.id_appointment)}
+                    className="btn btn-sm btn-primary me-2"
+                    aria-label="Editar"
+                >
                     <i className="bi bi-pencil-square"></i>
                 </button>
-            </div>
-            <button onClick={() => props.clickDelete(props.id_appointment)}
-                className="btn btn-sm btn-danger">
-                <i className="bi bi-trash-fill"></i>
-            </button>
-        </td>
-    </tr>
+                
+                {/* Botão de exclusão */}
+                <button
+                    onClick={() => props.clickDelete(props.id_appointment)}
+                    className="btn btn-sm btn-danger"
+                    aria-label="Excluir"
+                >
+                    <i className="bi bi-trash-fill"></i>
+                </button>
+            </td>
+        </tr>
+    );
 }
 
 export default Appointment;
