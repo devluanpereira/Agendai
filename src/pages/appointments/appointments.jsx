@@ -8,7 +8,6 @@ import 'react-confirm-alert/src/react-confirm-alert.css';
 import api from "../../constants/api";
 
 function Appointments() {
-
     const navigate = useNavigate();
     const [appointments, setAppointments] = useState([]);
     const [doctors, setDoctors] = useState([]);
@@ -16,89 +15,23 @@ function Appointments() {
     const [dtStart, setDtStart] = useState("");
     const [dtEnd, setDtEnd] = useState("");
 
-    function ClickEdit(id_appointment) {
-        navigate("/appointments/edit/" + id_appointment);
-    }
+    useEffect(() => {
+        LoadDoctors();
+        LoadAppointments();
+    }, []);
 
-    function ClickDelete(id_appointment) {
-        confirmAlert({
-            title: "Excluir",
-            message: "Voce tem certeza que deseja excluir este agendamento ?",
-            buttons: [
-                {
-                    label: "Sim",
-                    onClick: () => DeleteAppointments(id_appointment)
-                },
-                {
-                    label: "Não",
-                    onClick: () => {}
-                }
-            ]
-        });
-    }
-
-    async function LoadDoctors() {
-
+    const LoadDoctors = async () => {
         try {
             const response = await api.get("/doctors");
-
-            if (response.data) {
-                setDoctors(response.data);
-            }
+            setDoctors(response.data || []);
         } catch (error) {
-            if (error.response?.data.error) {
-                if (error.response.status == 401)
-                    return navigate("/");
-
-                alert(error.response?.data.error);
-
-            }
-            else
-                alert("Erro ao carregar médicos");
+            handleApiError(error, "Erro ao carregar médicos");
         }
-    }
+    };
 
+    const LoadAppointments = async () => {
+        if (!validateDates(dtStart, dtEnd)) return;
 
-    async function DeleteAppointments(id) {
-
-        try {
-            const response = await api.delete("/appointments/" + id);
-
-            if (response.data) {
-                LoadAppointments();
-            }
-        } catch (error) {
-            if (error.response?.data.error) {
-                if (error.response.status == 401)
-                    return navigate("/");
-
-                alert(error.response?.data.error);
-
-            }
-            else
-                alert("Erro ao excluir dados");
-        }
-    }
-
-
-    async function LoadAppointments() {
-        //console.log("LoadAppointments..");
-    
-        const isValidDate = (dateString) => {
-            const date = new Date(dateString);
-            return !isNaN(date.getTime());
-        };
-    
-        if (dtStart && !isValidDate(dtStart)) {
-            alert("Invalid start date");
-            return;
-        }
-    
-        if (dtEnd && !isValidDate(dtEnd)) {
-            alert("Invalid end date");
-            return;
-        }
-    
         try {
             const response = await api.get("/admin/appointments", {
                 params: {
@@ -107,30 +40,62 @@ function Appointments() {
                     dt_end: dtEnd
                 }
             });
-    
-            if (response.data) {
-                setAppointments(response.data);
-            }
+            setAppointments(response.data || []);
         } catch (error) {
-            if (error.response?.data.error) {
-                if (error.response.status == 401)
-                    return navigate("/");
-
-                alert(error.response?.data.error);
-            }
-            else
-                alert("Erro ao carregar appointments");
+            handleApiError(error, "Erro ao carregar agendamentos");
         }
-    }
+    };
 
-    function ChangeDoctor(e) {
+    const validateDates = (startDate, endDate) => {
+        const isValidDate = (dateString) => !isNaN(new Date(dateString).getTime());
+
+        if (startDate && !isValidDate(startDate)) {
+            alert("Data de início inválida");
+            return false;
+        }
+        if (endDate && !isValidDate(endDate)) {
+            alert("Data de término inválida");
+            return false;
+        }
+        return true;
+    };
+
+    const handleApiError = (error, defaultMessage) => {
+        if (error.response?.data.error) {
+            if (error.response.status === 401) navigate("/");
+            alert(error.response.data.error);
+        } else {
+            alert(defaultMessage);
+        }
+    };
+
+    const DeleteAppointments = async (id) => {
+        try {
+            await api.delete(`/appointments/${id}`);
+            LoadAppointments();
+        } catch (error) {
+            handleApiError(error, "Erro ao excluir agendamento");
+        }
+    };
+
+    const ClickEdit = (id_appointment) => {
+        navigate(`/appointments/edit/${id_appointment}`);
+    };
+
+    const ClickDelete = (id_appointment) => {
+        confirmAlert({
+            title: "Excluir",
+            message: "Você tem certeza que deseja excluir este agendamento?",
+            buttons: [
+                { label: "Sim", onClick: () => DeleteAppointments(id_appointment) },
+                { label: "Não" }
+            ]
+        });
+    };
+
+    const ChangeDoctor = (e) => {
         setIdDoctor(e.target.value);
-    }
-
-    useEffect(() => {
-        LoadDoctors();
-        LoadAppointments();
-    }, []);
+    };
 
     return (
         <div className="container-fluid mt-page">
@@ -142,18 +107,16 @@ function Appointments() {
                         Novo Agendamento
                     </Link>
                 </div>
-
                 <div className="d-flex flex-column flex-md-row justify-content-end align-items-center">
                     <div className="d-flex align-items-center mb-2 mb-md-0">
-                        <input id="startDate" className="form-control me-2" type="date" onChange={(e) => setDtStart(e.target.value)} />
+                        <input type="date" className="form-control me-2" onChange={(e) => setDtStart(e.target.value)} />
                         <span className="me-2">Até</span>
-                        <input id="endDate" className="form-control me-2" type="date" onChange={(e) => setDtEnd(e.target.value)} />
+                        <input type="date" className="form-control me-2" onChange={(e) => setDtEnd(e.target.value)} />
                     </div>
-
                     <div className="form-control me-2">
-                        <select name="doctor" id="doctor" value={idDoctor} onChange={ChangeDoctor} >
+                        <select value={idDoctor} onChange={ChangeDoctor}>
                             <option value="">Todos os médicos</option>
-                            {doctors.map((doc) => (
+                            {doctors.map(doc => (
                                 <option key={doc.id_doctor} value={doc.id_doctor}>
                                     {doc.name}
                                 </option>
@@ -163,7 +126,6 @@ function Appointments() {
                     <button onClick={LoadAppointments} className="btn btn-primary" type="button">Filtrar</button>
                 </div>
             </div>
-
             <div className="table-responsive">
                 <table className="table table-hover">
                     <thead>
@@ -177,7 +139,7 @@ function Appointments() {
                         </tr>
                     </thead>
                     <tbody>
-                        {appointments.map((ap) => (
+                        {appointments.map(ap => (
                             <Appointment
                                 key={ap.id_appointment}
                                 id_appointment={ap.id_appointment}
