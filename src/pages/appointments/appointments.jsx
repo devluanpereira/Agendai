@@ -46,27 +46,15 @@ function Appointments() {
         }
     };
 
-    const validateDates = (startDate, endDate) => {
-        const isValidDate = (dateString) => !isNaN(new Date(dateString).getTime());
-
-        if (startDate && !isValidDate(startDate)) {
-            alert("Data de início inválida");
-            return false;
-        }
-        if (endDate && !isValidDate(endDate)) {
-            alert("Data de término inválida");
-            return false;
-        }
-        return true;
-    };
+    const validateDates = (startDate, endDate) => 
+        (!startDate || !isNaN(new Date(startDate).getTime())) && 
+        (!endDate || !isNaN(new Date(endDate).getTime())) ||
+        alert("Data de início ou término inválida") && false;
 
     const handleApiError = (error, defaultMessage) => {
-        if (error.response?.data.error) {
-            if (error.response.status === 401) navigate("/");
-            alert(error.response.data.error);
-        } else {
-            alert(defaultMessage);
-        }
+        const errorMessage = error.response?.data.error || defaultMessage;
+        if (error.response?.status === 401) navigate("/");
+        alert(errorMessage);
     };
 
     const DeleteAppointments = async (id) => {
@@ -78,9 +66,7 @@ function Appointments() {
         }
     };
 
-    const ClickEdit = (id_appointment) => {
-        navigate(`/appointments/edit/${id_appointment}`);
-    };
+    const ClickEdit = (id_appointment) => navigate(`/appointments/edit/${id_appointment}`);
 
     const ClickDelete = (id_appointment) => {
         confirmAlert({
@@ -93,9 +79,7 @@ function Appointments() {
         });
     };
 
-    const ChangeDoctor = (e) => {
-        setIdDoctor(e.target.value);
-    };
+    const ChangeDoctor = (e) => setIdDoctor(e.target.value);
 
     return (
         <div className="container-fluid mt-page">
@@ -134,7 +118,7 @@ function Appointments() {
                             <th scope="col">Médico</th>
                             <th scope="col">Serviço</th>
                             <th scope="col">Data/Hora</th>
-                            <th scope="col" className="text-end">Valor</th>
+                            <th scope="col">Valor</th>
                             <th scope="col" className="col-buttons"></th>
                         </tr>
                     </thead>
